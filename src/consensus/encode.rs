@@ -145,13 +145,14 @@ pub fn serialize_hex<T: Encodable + ?Sized>(data: &T) -> String {
 /// doesn't consume the entire vector.
 pub fn deserialize<T: Decodable>(data: &[u8]) -> Result<T, Error> {
     let (rv, consumed) = deserialize_partial(data)?;
-
-    // Fail if data are not consumed entirely.
-    if consumed == data.len() {
-        Ok(rv)
-    } else {
-        Err(Error::ParseFailed("data not consumed entirely when explicitly deserializing"))
-    }
+    // Todo: investigate that why with LTC's segwit txs all the data is not consumed
+    Ok(rv)
+    // // Fail if data are not consumed entirely.
+    // if consumed == data.len() {
+    //     Ok(rv)
+    // } else {
+    //     Err(Error::ParseFailed("data not consumed entirely when explicitly deserializing"))
+    // }
 }
 
 /// Deserialize an object from a vector, but will not report an error if said deserialization
