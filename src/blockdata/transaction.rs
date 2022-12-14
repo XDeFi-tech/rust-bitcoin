@@ -1068,9 +1068,26 @@ impl Decodable for Transaction {
                             lock_time: Decodable::consensus_decode_from_finite_reader(r)?,
                         })
                     }
+                },
+                // Adding support for segwit addresses for LTC, not checkking the witnesses for mined blocks
+                x => {
+                    let mut input = Vec::<TxIn>::consensus_decode_from_finite_reader(r)?;
+                    let output = Vec::<TxOut>::consensus_decode_from_finite_reader(r)?;
+                    for txin in input.iter_mut() {
+                        txin.witness = Decodable::consensus_decode_from_finite_reader(r)?;
+                    }
+                    // For now we let any kind of tx without witness be passed to the indexer
+                    if false {
+                        Err(encode::Error::ParseFailed("[BTC LIB] segwit tx is not supported, the input is empty"))
+                    } else {
+                        Ok(Transaction {
+                            version,
+                            input,
+                            output,
+                            lock_time: Decodable::consensus_decode_from_finite_reader(r)?,
+                        })
+                    }                    
                 }
-                // We don't support anything else
-                x => Err(encode::Error::UnsupportedSegwitFlag(x)),
             }
         // non-segwit
         } else {
